@@ -3,19 +3,18 @@ package com.example.identity_service.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
 
-import com.example.identity_service.dto.UserCreationRequest;
-import com.example.identity_service.dto.UserUpdateRequest;
+import com.example.identity_service.dto.response.UserResponse;
+import com.example.identity_service.dto.resquest.ApiResponse;
+import com.example.identity_service.dto.resquest.UserCreationRequest;
+import com.example.identity_service.dto.resquest.UserUpdateRequest;
 import com.example.identity_service.entity.User;
 import com.example.identity_service.service.UserService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -26,30 +25,35 @@ public class UserController {
 @Autowired
 private UserService userService;
 
-@PostMapping
-    User createUser(@RequestBody UserCreationRequest request){
-        return userService.createUser(request);
-}
-@GetMapping
-List <User> getUsers(){
-return userService.getUsers();
-}
+  @PostMapping
+    public ResponseEntity<ApiResponse<User>> createUser(@Valid @RequestBody UserCreationRequest request) {
+        User created = userService.createUser(request);
+        return ResponseEntity.ok(ApiResponse.ok(created)); // status=200, code=1000
+    }
+  @GetMapping
+    public ResponseEntity<ApiResponse<List<User>>> getUsers() {
+        return ResponseEntity.ok(ApiResponse.ok(userService.getUsers()));
+    }
 
 @GetMapping("/{userId}")
- User getUser(@PathVariable("userId") String userId){
-        return userService.getUser(userId);
- }
+UserResponse getUser(@PathVariable("userId") String userId){
+    return userService.getUser(userId);
+}
+
 
  @PutMapping("/{userId}")
-User updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request){
-    return userService.updateUser(userId,request);
+
+ UserResponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request){
+    return userService.updateUser(userId, request);
 }
 
 @DeleteMapping("/{userId}")
-String deleteUser(@PathVariable String userId){
-    userService.deleteUser(userId);
-    return "User has been delete";
-    
+
+public ResponseEntity<ApiResponse<String>> deleteUser(@PathVariable String userId){
+        userService.deleteUser(userId);
+        return ResponseEntity.ok(ApiResponse.ok("User has been deleted"));
+
 }
+
 
 }
